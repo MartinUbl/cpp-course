@@ -1,0 +1,1 @@
+ADD_EXECUTABLE(05_c_iomanip main.cpp)

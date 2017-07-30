@@ -1,0 +1,1 @@
+ADD_EXECUTABLE(02_a_raii main.cpp)

@@ -1,0 +1,6 @@
+ADD_SUBDIRECTORY(a_constexpr)
+ADD_SUBDIRECTORY(b_lambda)
+ADD_SUBDIRECTORY(c_auto)
+ADD_SUBDIRECTORY(d_stl)
+ADD_SUBDIRECTORY(e_enum_class)
+ADD_SUBDIRECTORY(f_range_based_for)

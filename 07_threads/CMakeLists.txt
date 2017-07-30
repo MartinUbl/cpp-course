@@ -1,0 +1,4 @@
+ADD_SUBDIRECTORY(a_basics)
+ADD_SUBDIRECTORY(b_mutex)
+ADD_SUBDIRECTORY(c_cond_variables)
+ADD_SUBDIRECTORY(d_atomic)

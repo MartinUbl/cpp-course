@@ -1,0 +1,1 @@
+ADD_EXECUTABLE(03_a_exceptions main.cpp)

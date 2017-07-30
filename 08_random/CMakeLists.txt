@@ -1,0 +1,1 @@
+ADD_EXECUTABLE(08_a_random main.cpp)

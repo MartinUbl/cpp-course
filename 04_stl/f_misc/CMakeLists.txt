@@ -1,0 +1,1 @@
+ADD_EXECUTABLE(04_f_misc main.cpp)

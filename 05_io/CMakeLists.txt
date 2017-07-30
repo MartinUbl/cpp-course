@@ -1,0 +1,3 @@
+ADD_SUBDIRECTORY(a_stringstream)
+ADD_SUBDIRECTORY(b_files)
+ADD_SUBDIRECTORY(c_iomanip)

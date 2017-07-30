@@ -1,0 +1,1 @@
+ADD_EXECUTABLE(01_c_multiple_inheritance main.cpp elephant.h pig.h elepig.h elephant.cpp pig.cpp elepig.cpp)

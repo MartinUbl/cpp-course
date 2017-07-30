@@ -1,0 +1,1 @@
+ADD_EXECUTABLE(10_b_lambda main.cpp)

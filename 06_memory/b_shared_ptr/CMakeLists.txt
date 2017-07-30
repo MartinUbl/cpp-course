@@ -1,0 +1,1 @@
+ADD_EXECUTABLE(06_b_shared_ptr main.cpp)

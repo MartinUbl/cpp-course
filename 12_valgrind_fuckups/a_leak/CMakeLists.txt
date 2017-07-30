@@ -1,0 +1,1 @@
+ADD_EXECUTABLE(12_a_leak main.cpp)

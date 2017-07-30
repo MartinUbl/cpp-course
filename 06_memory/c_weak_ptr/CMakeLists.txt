@@ -1,0 +1,1 @@
+ADD_EXECUTABLE(06_c_weak_ptr main.cpp)

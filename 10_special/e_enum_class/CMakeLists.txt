@@ -1,0 +1,1 @@
+ADD_EXECUTABLE(10_e_enum_class main.cpp)

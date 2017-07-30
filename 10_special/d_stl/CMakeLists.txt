@@ -1,0 +1,1 @@
+ADD_EXECUTABLE(10_d_stl main.cpp)

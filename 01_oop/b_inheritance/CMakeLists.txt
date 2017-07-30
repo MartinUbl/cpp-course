@@ -1,0 +1,1 @@
+ADD_EXECUTABLE(01_b_inheritance main.cpp rodic.h timmy.h jimmy.h)

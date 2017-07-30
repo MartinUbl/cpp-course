@@ -1,0 +1,1 @@
+ADD_EXECUTABLE(07_d_atomic main.cpp)

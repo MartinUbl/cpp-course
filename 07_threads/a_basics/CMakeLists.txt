@@ -1,0 +1,1 @@
+ADD_EXECUTABLE(07_a_basics main.cpp)

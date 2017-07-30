@@ -1,0 +1,1 @@
+ADD_EXECUTABLE(05_a_stringstream main.cpp)

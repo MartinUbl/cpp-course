@@ -1,0 +1,1 @@
+ADD_EXECUTABLE(01_d_operators main.cpp)

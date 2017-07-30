@@ -1,0 +1,1 @@
+ADD_EXECUTABLE(04_a_string main.cpp)

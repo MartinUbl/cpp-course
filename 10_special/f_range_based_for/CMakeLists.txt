@@ -1,0 +1,1 @@
+ADD_EXECUTABLE(10_f_range_based_for main.cpp)

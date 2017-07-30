@@ -1,0 +1,1 @@
+ADD_EXECUTABLE(10_c_auto main.cpp)

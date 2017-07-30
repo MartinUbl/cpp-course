@@ -1,0 +1,1 @@
+ADD_EXECUTABLE(12_c_range main.cpp)
