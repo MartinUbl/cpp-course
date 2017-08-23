@@ -6,17 +6,19 @@
 // Struktura klasickeho 2D vektoru roviny, ktery zname z analyticke geometrie
 struct Vektor
 {
-    Vektor()
+    Vektor() : x(0), y(0)
     {
     };
 
-    // muze ale nemusi byt, jelikoz mame inicializator { }, viz nize
+    // konstruktor umoznujici inicializaci
     Vektor(float _x, float _y) : x(_x), y(_y)
     {
     }
 
     float x;    // souradnice X
     float y;    // souradnice Y
+
+
 
     void print()
     {
@@ -27,7 +29,7 @@ struct Vektor
     // vektor = vektor + vektor
     Vektor operator+(const Vektor& druhy)
     {
-        return Vektor{ x + druhy.x, y + druhy.y };
+        return Vektor(x + druhy.x, y + druhy.y);
     }
 
     // vysledkem operace muze byt i "nic", pouze napr. uprava stavajiciho objektu
@@ -49,7 +51,7 @@ struct Vektor
     // vektor = vektor*float
     Vektor operator*(const float& kolikrat)
     {
-        return Vektor{ x*kolikrat, y*kolikrat };
+        return Vektor(x*kolikrat, y*kolikrat);
     }
 
     // operandem muze byt i uplne jiny typ
@@ -77,9 +79,9 @@ std::ostream& operator<<(std::ostream& os /* leva strana */, Vektor const& v /* 
 }
 
 // umozni delat: vektor = vektor / float;
-Vektor& operator/(const Vektor& d /* leva strana */, const float& f /* prava strana */)
+Vektor operator/(const Vektor& d /* leva strana */, const float& f /* prava strana */)
 {
-    return Vektor{ d.x/f, d.y/f };
+    return Vektor(d.x/f, d.y/f);
 }
 
 

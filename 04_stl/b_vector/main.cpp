@@ -43,6 +43,12 @@ int main(int argc, char** argv)
 
 
 
+    // inicializace konstantnim polem; optimalni vzhledem k moznostem (interne provede reserve a naplni pamet primo kopii)
+    std::vector<int> d = { 10, 20, 30, 40 };
+
+
+
+
 
     size_t i;
 
@@ -59,12 +65,18 @@ int main(int argc, char** argv)
 
     // pruchod vektoru - 3) range-based for
     i = 0;
-    for (int& p : c)
+    for (int p : c)
         std::cout << "c[" << (i++) << "] = " << p << std::endl;
 
     // pro pruchod doporucuji pouzivat zpusob 1 nebo 3; u vektoru mi ale prijde logictejsi 1
 
 
+
+
+
+    // mazani z vektoru - nelze indexem, musime pouzit iterator
+    // - neni efektivni, musi preusporadat vsechny nasledujici prvky o index zpet; jina moznost vsak neexistuje
+    c.erase(c.begin() + 2);
 
 
 
@@ -90,10 +102,12 @@ int main(int argc, char** argv)
     std::vector<Test> t_a;
     std::vector<Test> t_b;
 
-    std::cout << "Reserve:" << std::endl;
+    std::cout << "Reserve BEFORE" << std::endl;
     t_a.reserve(10);
-    std::cout << "Resize:" << std::endl;
+    std::cout << "Reserve AFTER" << std::endl;
+    std::cout << "Resize BEFORE" << std::endl;
     t_b.resize(10);
+    std::cout << "Resize AFTER" << std::endl;
 
     // metoda at() kontroluje za behu, zdali se snazime pristoupit na existujici prvek; pokud ne, vyhodi vyjimku
     // tento pristup je pomalejsi, ale bezpecnejsi; nicmene v praxi se mnohem vice vyplati pristup pres indexy
@@ -102,7 +116,7 @@ int main(int argc, char** argv)
     {
         t_a.at(1);
     }
-    catch (std::out_of_range const& a)
+    catch (std::out_of_range const& )
     {
         std::cout << "t_a.at(1) - out of range" << std::endl;
     }
@@ -111,7 +125,7 @@ int main(int argc, char** argv)
     {
         t_b.at(1);
     }
-    catch (std::out_of_range const& a)
+    catch (std::out_of_range const& )
     {
         std::cout << "t_b.at(1) - out of range" << std::endl;
     }
