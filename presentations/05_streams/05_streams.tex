@@ -1,0 +1,220 @@
+% !TEX TS-program = pdflatex
+% !TEX encoding = UTF-8 Unicode
+
+\documentclass{beamer}
+\usepackage[czech]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage{times}
+\usepackage[T1]{fontenc}
+\usepackage{verbatim}
+\usepackage{listings}
+\usepackage{xcolor}
+
+\mode<presentation>
+{
+	\usetheme{antibes}
+	\usecolortheme{orchid}
+}
+
+\setbeamertemplate{navigation symbols}{}
+
+\definecolor{cmtgreen}{RGB}{0,192,0}
+
+\begin{document}
+
+\title{C++; delete Java;}
+\subtitle{Část 5: I/O operace a streamy}
+\author{Kennny}
+\date{srpen 2017}
+
+\frame{\titlepage}
+
+\lstset{language=C++,
+        basicstyle=\ttfamily,
+        keywordstyle=\color{blue}\ttfamily,
+        stringstyle=\color{red}\ttfamily,
+        commentstyle=\color{cmtgreen}\ttfamily,
+        morecomment=[l][\color{magenta}]{\#}
+}
+
+\newenvironment{xframe}[1][]
+  {\begin{frame}[fragile,environment=xframe,#1]}
+  {\end{frame}}
+
+\begin{comment}
+\begin{xframe}{tttt}
+	\begin{itemize}
+		\item
+	\end{itemize}
+\end{xframe}
+\end{comment}
+
+
+
+\section{I/O}
+\subsection{Obecné}
+
+
+\begin{xframe}{I/O operace}
+	\begin{itemize}
+		\item STL zaobaluje vstupně-výstupní operace do tzv. streamů
+		\item dva streamy již známe - \texttt{std::cout} a \texttt{std::cin}
+		\item mají přetížený operátor \texttt{<<} (výstup) a/nebo \texttt{>>} (vstup)
+	\end{itemize}
+\end{xframe}
+
+\begin{xframe}{Stream}
+	\begin{itemize}
+		\item kromě jiných části hierarchie nás zajímají dva předci streamů
+			\begin{itemize}
+				\item \texttt{std::istream} - předek vstupního streamu
+				\item \texttt{std::ostream} - předek výstupního streamu
+			\end{itemize}
+		\item již lze odvodit, že
+			\begin{itemize}
+				\item \texttt{std::cout} je globální instance \texttt{std::ostream}
+				\item \texttt{std::cin} je globální instance \texttt{std::istream}
+			\end{itemize}
+		\item od těchto předků pak dědí další varianty, nás budou zajímat zejména varianty pro práci s řetězcem a souborem
+	\end{itemize}
+\end{xframe}
+
+\begin{xframe}{Vlastní přetížení operátoru}
+	\begin{itemize}
+		\item je vhodné připomenout, že si můžeme přetížit operátor<< a >> jak potřebujeme pro práci s \texttt{std::istream} a \texttt{std::ostream}
+		\item připomeňme například ten pro výpis souřadnic vektoru
+\begin{lstlisting}[basicstyle=\fontsize{8}{9}\selectfont\ttfamily]
+std::ostream& operator<<(std::ostream& os, Vektor const& v)
+{
+    os << "(" << v.x << ", " << v.y << ")";
+    return os;
+}
+\end{lstlisting}
+		\item nutno dodat, že operaci definujeme nad \texttt{std::ostream}, tedy bude fungovat jak nad řetězcovým, tak souborovým, tak jakýmkoliv jiným výstupním streamem
+	\end{itemize}
+\end{xframe}
+
+
+\begin{xframe}{Input stream}
+	\begin{itemize}
+		\item při čtení je výchozí oddělovač zakončení řádku
+		\item lze vynutit jiné použitím \texttt{std::getline} namísto operátoru \texttt{>>}
+\begin{lstlisting}[basicstyle=\fontsize{8}{9}\selectfont\ttfamily]
+std::getline(stream, targetstring, ';');
+\end{lstlisting}
+		\item má přetíženy operátory pro všechny primitivní typy a string
+	\end{itemize}
+\end{xframe}
+
+\subsection{Konkrétní implementace}
+
+\begin{xframe}{Řetězcový stream}
+	\begin{itemize}
+		\item \texttt{\#include <sstream>}
+		\item \texttt{std::istringstream} a \texttt{std::ostringstream} - implementace \texttt{std::istream} a \texttt{std::ostream} nad řetězcem
+		\item \texttt{std::stringstream} - vícenásobná dědičnost od obou předků
+		\item pro vyzvednutí řetězce z \texttt{std::ostringstream}
+			\begin{itemize}
+				\item metoda \texttt{str()}, vrací instanci \texttt{std::string}
+				\item pozor, nutno zkopírovat, po zaniknutí streamu zaniká i instance stringu
+			\end{itemize}
+	\end{itemize}
+\end{xframe}
+
+\begin{xframe}{Příklad}
+	\begin{itemize}
+		\item Prostor pro příklad 05\_a\_stringstream
+	\end{itemize}
+\end{xframe}
+
+
+\begin{xframe}{Souborový stream}
+	\begin{itemize}
+		\item \texttt{\#include <fstream>}
+		\item \texttt{std::ifstream} a \texttt{std::ofstream} - implementace \texttt{std::istream} a \texttt{std::ostream} nad souborem
+		\item \texttt{std::fstream} - vícenásobná dědičnost od obou předků
+		\item módy otevření souboru (bitmaska, lze skládat \texttt{|} )
+			\begin{itemize}
+				\item \texttt{std::ios::in} - pro čtení ("r")
+				\item \texttt{std::ios::out} - pro zápis ("w")
+				\item \texttt{std::ios::binary} - binárně ("b")
+				\item \texttt{std::ios::app} - nepřepisovat, připojit za konec ("a")
+			\end{itemize}
+		\item RAII struktury - destruktor zavírá soubor
+	\end{itemize}
+\end{xframe}
+
+\begin{xframe}{Souborový stream}
+	\begin{itemize}
+		\item pro textové čtení a zápis operátory \texttt{<<} a \texttt{>>}
+		\item pro binární čtení a zápis metody \texttt{read()} a \texttt{write()}
+	\end{itemize}
+\end{xframe}
+
+\begin{xframe}{Příklad}
+	\begin{itemize}
+		\item Prostor pro příklad 05\_b\_files
+	\end{itemize}
+\end{xframe}
+
+\subsection{Manipulátory}
+
+\begin{xframe}{Manipulátory výstupů}
+	\begin{itemize}
+		\item \texttt{\#include <iomanip>}
+		\item vkládají se operátory \texttt{<<} nebo \texttt{>>} (podle typu streamu)
+		\item parametrické a bezparametrické manipulátory
+	\end{itemize}
+\end{xframe}
+
+\begin{xframe}{Číselný vstup/výstup}
+	\begin{itemize}
+		\item prefixovat číslo základem? \texttt{std::showbase} ; rozmysleli jsme si to? \texttt{std::noshowbase}
+		\item změna základu čísla: \texttt{std::setbase()} (podporuje 8, 10 a 16), případně:
+			\begin{itemize}
+				\item \texttt{std::hex}, \texttt{std::dec}, \texttt{std::oct}
+			\end{itemize}
+\begin{lstlisting}[basicstyle=\fontsize{8}{9}\selectfont\ttfamily]
+std::cout << std::hex  << std::showbase<< 127;
+// vystup: 0x7F
+\end{lstlisting}
+
+		\item formát čísla s des. tečkou: \texttt{std::fixed}, \texttt{std::scientific}
+		\item přesnost čísla s des. tečkou (počet des. míst): \texttt{std::setprecision}
+\begin{lstlisting}[basicstyle=\fontsize{8}{9}\selectfont\ttfamily]
+std::cout << std::scientific << std::setprecision(2) << 12.3531;
+// vystup: 1.23e+01
+\end{lstlisting}
+	\end{itemize}
+\end{xframe}
+
+\begin{xframe}{Další}
+	\begin{itemize}
+		\item znaky čísla mají být velké? \texttt{std::uppercase} ; rozmysleli jsme si to? \texttt{std::nouppercase}
+		\item chceme všechna čísla stejně dlouhá? \texttt{std::setw}
+		\item chceme neobsazené cifry vypnit znakem? \texttt{std::setfill}
+		\item bool hodnoty řetězcem? \texttt{std::boolalpha} ; rozmysleli jsme si to? \texttt{std::noboolalpha}
+		\item a další... \url{http://en.cppreference.com/w/cpp/io/manip}
+	\end{itemize}
+\end{xframe}
+
+\begin{xframe}{Příklad}
+	\begin{itemize}
+		\item Prostor pro příklad 05\_c\_iomanip
+	\end{itemize}
+\end{xframe}
+
+
+
+\begin{xframe}{Konec 5. části}
+\texttt{exit(0);}
+\end{xframe}
+
+
+
+
+\end{document}
+
+
+
+

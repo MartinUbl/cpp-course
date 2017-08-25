@@ -1,0 +1,150 @@
+% !TEX TS-program = pdflatex
+% !TEX encoding = UTF-8 Unicode
+
+\documentclass{beamer}
+\usepackage[czech]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage{times}
+\usepackage[T1]{fontenc}
+\usepackage{verbatim}
+\usepackage{listings}
+\usepackage{xcolor}
+
+\mode<presentation>
+{
+	\usetheme{antibes}
+	\usecolortheme{orchid}
+}
+
+\setbeamertemplate{navigation symbols}{}
+
+\definecolor{cmtgreen}{RGB}{0,192,0}
+
+\begin{document}
+
+\title{C++; delete Java;}
+\subtitle{Část 8: pseudonáhodná čísla}
+\author{Kennny}
+\date{srpen 2017}
+
+\frame{\titlepage}
+
+\lstset{language=C++,
+        basicstyle=\ttfamily,
+        keywordstyle=\color{blue}\ttfamily,
+        stringstyle=\color{red}\ttfamily,
+        commentstyle=\color{cmtgreen}\ttfamily,
+        morecomment=[l][\color{magenta}]{\#}
+}
+
+\newenvironment{xframe}[1][]
+  {\begin{frame}[fragile,environment=xframe,#1]}
+  {\end{frame}}
+
+\begin{comment}
+\begin{xframe}{tttt}
+	\begin{itemize}
+		\item
+	\end{itemize}
+\end{xframe}
+\end{comment}
+
+
+
+\section{Generátory pseudonáhodných čísel}
+\subsection{Obecné}
+
+
+
+\begin{xframe}{Generátory}
+	\begin{itemize}
+		\item je k dispozici několik generátorů
+		\item tyto generátory se vyznačují tím, že každý generuje "jinou náhodu"
+		\item pro nás je důležité jen to, že existují
+		\item \texttt{std::random\_device} - obaluje zdroj náhody, např. \texttt{/dev/urandom} pokud je k dispozici, apod.
+		\item může být ale pomalý, hodí se např. jen pro inicializaci generátoru pseudonáhodných čísel
+	\end{itemize}
+\end{xframe}
+
+\begin{xframe}{Generátory}
+	\begin{itemize}
+		\item v STL existuje více generátorů pseudonáh. čísel
+			\begin{itemize}
+				\item \texttt{std::default\_random\_engine} - alias pro jiný generátor
+				\item \texttt{std::mersenne\_twister\_engine} - Mersenne Twister generátor
+				\item \texttt{std::linear\_congruental\_engine} - lineární kongruentní generátor
+				
+			\end{itemize}
+		\item ty mají často ale své parametry
+		\item na to v STL bylo myšleno a byly vytvořeny aliasy s ověřenou parametrizací
+			\begin{itemize}
+				\item \texttt{std::mt19937} - většinou výchozí, mersenne twister
+				\item \texttt{std::minstd\_rand}
+				\item \texttt{std::knuth\_b}
+				\item ...
+			\end{itemize}
+	\end{itemize}
+\end{xframe}
+
+
+\begin{xframe}{Rozložení}
+	\begin{itemize}
+		\item samotný generátor nestačí
+		\item jím generované hodnoty musí projít ještě generátorem rozložení
+		\item k dispozici jsou standardní rozložení
+			\begin{itemize}
+				\item \texttt{std::uniform\_int\_distribution} - rovnoměrné celočíselné
+				\item \texttt{std::uniform\_real\_distribution} - rovnoměrné desetinné
+				\item \texttt{std::normal\_distribution} - normální
+				\item \texttt{std::poisson\_distribution} - Poissonovo
+				\item \texttt{std::chi\_squared\_distribution} - Chí-kvadrát
+				\item a spousty dalších
+			\end{itemize}
+		\item šablonové typy
+	\end{itemize}
+\end{xframe}
+
+\begin{xframe}{Příklad}
+	\begin{itemize}
+		\item prakticky vždy si vystačíme s konstrukcí podobnou této
+	\end{itemize}
+	
+\begin{lstlisting}[basicstyle=\fontsize{8}{9}\selectfont\ttfamily]
+// klidne jen jeden na cely program
+std::random_device rd;
+
+// vytvoreni PRNG generatoru, jako seed je pouzita hodnota
+// z random device
+std::default_random_engine eng(rd());
+std::uniform_int_distribution<int> dist(1, 6);
+
+int hraciKostka()
+{
+    return dist(eng);
+}
+\end{lstlisting}
+	
+\end{xframe}
+
+
+\begin{xframe}{Příklad}
+	\begin{itemize}
+		\item Prostor pro příklad 08\_a\_random
+	\end{itemize}
+\end{xframe}
+
+
+
+
+\begin{xframe}{Konec 8. části}
+\texttt{exit(0);}
+\end{xframe}
+
+
+
+
+\end{document}
+
+
+
+

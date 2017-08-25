@@ -1,0 +1,312 @@
+% !TEX TS-program = pdflatex
+% !TEX encoding = UTF-8 Unicode
+
+\documentclass{beamer}
+\usepackage[czech]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage{times}
+\usepackage[T1]{fontenc}
+\usepackage{verbatim}
+\usepackage{listings}
+\usepackage{xcolor}
+
+\mode<presentation>
+{
+	\usetheme{antibes}
+	\usecolortheme{orchid}
+}
+
+\setbeamertemplate{navigation symbols}{}
+
+\definecolor{cmtgreen}{RGB}{0,192,0}
+
+\begin{document}
+
+\title{C++; delete Java;}
+\subtitle{Část 7: vlákna a synchronizace}
+\author{Kennny}
+\date{srpen 2017}
+
+\frame{\titlepage}
+
+\lstset{language=C++,
+        basicstyle=\ttfamily,
+        keywordstyle=\color{blue}\ttfamily,
+        stringstyle=\color{red}\ttfamily,
+        commentstyle=\color{cmtgreen}\ttfamily,
+        morecomment=[l][\color{magenta}]{\#}
+}
+
+\newenvironment{xframe}[1][]
+  {\begin{frame}[fragile,environment=xframe,#1]}
+  {\end{frame}}
+
+\begin{comment}
+\begin{xframe}{tttt}
+	\begin{itemize}
+		\item
+	\end{itemize}
+\end{xframe}
+\end{comment}
+
+
+
+\section{Vlákna a synchronizace}
+\subsection{Vlákno}
+
+
+
+\begin{xframe}{Vlákno}
+	\begin{itemize}
+		\item \texttt{\#include <thread>}
+		\item konstruktor vytváří i spouští vlákno
+		\item destruktor - pokud má objekt stále přiřazeno fyzické vlákno, hází výjimku
+			\begin{itemize}
+				\item lze vyřešit např. užitím metody \texttt{detach()}
+			\end{itemize}
+		\item lze předat vláknu parametry takřka 1:1 s konstruktorem \texttt{std::thread}
+		\item konstruktor má jako první argument funkci, kterou má provádět; zbytek argumentů jsou argumenty této funkce pro dané vlákno
+		\item metoda \texttt{join()} - "připojí"~aktuální vlákno k tomuto
+	\end{itemize}
+\end{xframe}
+
+\begin{xframe}{Vlákno}
+	\begin{itemize}
+		\item Vytvoření vlákna a počkání na ukončení
+\begin{lstlisting}[basicstyle=\fontsize{8}{9}\selectfont\ttfamily]
+// vytvori vlakno
+std::thread vlakno(&zpracujFrontu, 5);
+
+// pocka na jeho ukonceni
+vlakno.join();
+
+// napr. zde je uz bezpecne volat destruktor
+\end{lstlisting}
+		\item Vytvoření vlákna a "odtržení"~od objektu, aby mohl být bezpečně volán destruktor
+\begin{lstlisting}[basicstyle=\fontsize{8}{9}\selectfont\ttfamily]
+{
+    // vytvori vlakno
+    std::thread vlakno(&zpracujFrontu, 5);
+
+    // odtrzeni od objektu
+    vlakno.detach();
+}
+\end{lstlisting}
+	\end{itemize}
+\end{xframe}
+
+\begin{xframe}{Explicitní předání řízení a spánek}
+	\begin{itemize}
+		\item \texttt{std::this\_thread::yield()} - vzdá se svého časového kvanta ve prospěch jiného vlákna (kterého, to řídí plánovač)
+		\item \texttt{std::this\_thread::sleep\_for()} - spánek na určitou dobu
+		\item \texttt{std::this\_thread::sleep\_until()} - spánek do určitého momentu
+	\end{itemize}
+\end{xframe}
+
+\begin{xframe}{Vsuvka: std::chrono}
+	\begin{itemize}
+		\item \texttt{\#include <chrono>}
+		\item modul STL pro práci s časovými úseky a body
+		\item datové typy zaobaleny metodami podle jednotek
+			\begin{itemize}
+				\item např. \texttt{std::chrono::milliseconds()}, \texttt{std::chrono::seconds()}
+				\item výsledný typ vždy \texttt{std::chrono::duration}
+			\end{itemize}
+		\item od C++14 podporuje speciální literály pro eliminaci dlouhé syntaxe
+\begin{lstlisting}[basicstyle=\fontsize{8}{9}\selectfont\ttfamily]
+using namespace std::chrono_literals;
+
+std::this_thread::sleep_for(1250ms);
+\end{lstlisting}
+		\item spousty dalších věcí, ale pro nás důležité zatím jen tohle
+	\end{itemize}
+\end{xframe}
+
+\begin{xframe}{Vsuvka: thread\_local}
+	\begin{itemize}
+		\item k dispozici je malé úložiště pro vlákno (zásobník)
+		\item lze deklarovat proměnnou jako \texttt{thread\_local}
+		\item pak má každé vlákno svou vlastní instanci pod stejným jménem
+\begin{lstlisting}[basicstyle=\fontsize{8}{9}\selectfont\ttfamily]
+thread_local int threadCounter = 0;
+\end{lstlisting}
+		\item platnost sdružená s kontextem vlákna
+	\end{itemize}
+\end{xframe}
+
+\begin{xframe}{Příklad}
+	\begin{itemize}
+		\item Prostor pro příklad 07\_a\_basics
+	\end{itemize}
+\end{xframe}
+
+
+
+\subsection{Synchronizace}
+
+\begin{xframe}{std::mutex}
+	\begin{itemize}
+		\item \texttt{\#include <mutex>}
+		\item klasický mutex pro ochranu kritické sekce
+		\item varianty
+			\begin{itemize}
+				\item \texttt{std::mutex} - klasický mutex
+				\item \texttt{std::recursive\_mutex} - mutex který podporuje rekurzivní zamykání ze stejného vlákna
+				\item \texttt{std::timed\_mutex} - mutex s podporou timeoutu při čekání
+				\item \texttt{std::shared\_timed\_mutex} - sdílený mutex s podporou timeoutu (např. čtenář-písař))
+				\item (\texttt{std::shared\_mutex} - sdílený mutex); (C++17)
+				\item a další...
+			\end{itemize}
+	\end{itemize}
+\end{xframe}
+
+\begin{xframe}{std::mutex}
+	\begin{itemize}
+		\item zamykání by mělo být obaleno RAII zámkem
+		\item dostupné zámky
+			\begin{itemize}
+				\item \texttt{std::lock\_guard} - jednoduchý lock/unlock zámek
+				\item \texttt{std::unique\_lock} - exkluzivní zámek (lze odložit zamčení, pracovat se sdíleným mutexem, ..)
+				\item \texttt{std::shared\_lock} - sdílený zámek (význam u shared mutexů)
+			\end{itemize}
+		\item pro potřeby kurzu se omezíme na klasický mutex, \texttt{std::lock\_guard} a \texttt{std::unique\_lock}
+	\end{itemize}
+\end{xframe}
+
+\begin{xframe}{Zamčení mutexu}
+	\begin{itemize}
+		\item klasické jednoduché použití pro kritickou sekci chráněnou jedním mutexem
+\begin{lstlisting}[basicstyle=\fontsize{8}{9}\selectfont\ttfamily]
+// sdileny mutex, deklarovan nekde viditelne
+std::mutex mtx;
+
+// scope kriticke sekce
+{
+    std::lock_guard<std::mutex> lck(mtx);
+    
+    // kriticka sekce
+}
+// uvolneni zamku s koncem platnosti (scope)
+\end{lstlisting}
+	\end{itemize}
+\end{xframe}
+
+\begin{xframe}{Zamčení více mutexů}
+	\begin{itemize}
+		\item použití pro (vícenásobnou) kritickou sekci chráněnou více mutexy
+\begin{lstlisting}[basicstyle=\fontsize{8}{9}\selectfont\ttfamily]
+// sdilene mutexy
+std::mutex mtx1, mtx2;
+
+// scope kriticke sekce
+{
+    std::unique_lock<std::mutex> lck1(mtx, std::defer_lock);
+    std::unique_lock<std::mutex> lck2(mtx, std::defer_lock);
+    
+    // zatim nezamceno
+    
+    std::lock(lck1, lck2);
+    
+    // kriticka sekce
+}
+// uvolneni obou zamku s koncem platnosti (scope)
+\end{lstlisting}
+	\end{itemize}
+\end{xframe}
+
+\begin{xframe}{Příklad}
+	\begin{itemize}
+		\item Prostor pro příklad 07\_b\_mutex
+	\end{itemize}
+\end{xframe}
+
+
+\begin{xframe}{std::condition\_variable}
+	\begin{itemize}
+		\item \texttt{\#include <condition\_variable>}
+		\item klasická podmínková proměnná
+		\item k fungování potřebuje zámek a odpovídající mutex
+		\item metody
+			\begin{itemize}
+				\item \texttt{wait()} - čeká dokud není probuzena
+				\item \texttt{wait\_for()} - čeká dokud není probuzena nebo neuplyne zadaná doba
+				\item \texttt{wait\_until()} - čeká dokud není probuzena nebo do zadaného momentu
+				\item \texttt{notify\_one()} - probudí jedno blokované vlákno
+				\item \texttt{notify\_all()} - probudí všechny
+			\end{itemize}
+	\end{itemize}
+\end{xframe}
+
+\begin{xframe}{std::condition\_variable}
+	\begin{itemize}
+		\item \texttt{wait()} jako argument bere zámek a volitelně i podmínku k probuzení ve formě funkce, lambda funkce nebo funktoru
+		\item tato podmínka dokáže odstínit spurious wakeup
+	\end{itemize}
+\begin{lstlisting}[basicstyle=\fontsize{8}{9}\selectfont\ttfamily]
+std::unique_lock<std::mutex> lck(mtx);
+
+std::condition_variable cv;
+
+cv.wait(lck, &canWakeUp);
+
+...
+
+bool canWakeUp()
+{
+    return (count == 0);
+}
+\end{lstlisting}
+\end{xframe}
+
+\begin{xframe}{Příklad}
+	\begin{itemize}
+		\item Prostor pro příklad 07\_c\_cond\_variables
+	\end{itemize}
+\end{xframe}
+
+\begin{xframe}{std::atomic}
+	\begin{itemize}
+		\item \texttt{\#include <atomic>}
+		\item šablonový typ nad primitivními datovými typy
+		\item zaručuje atomické provedení takto proveditelných operací
+			\begin{itemize}
+				\item ++, --
+				\item +=, -=, \&=, |=, \texttt{\^}=
+			\end{itemize}
+		\item není potřeba explicitně nic zamykat
+	\end{itemize}
+\end{xframe}
+
+\begin{xframe}{std::atomic}
+	\begin{itemize}
+		\item všechny zmíněné operátory jsou přetíženy
+		\item není potřeba speciálního zacházení
+	\end{itemize}
+\begin{lstlisting}[basicstyle=\fontsize{8}{9}\selectfont\ttfamily]
+std::atomic<int> myCounter = 0;
+
+myCounter++;
+\end{lstlisting}
+\end{xframe}
+
+\begin{xframe}{Příklad}
+	\begin{itemize}
+		\item Prostor pro příklad 07\_d\_atomic
+	\end{itemize}
+\end{xframe}
+
+
+
+
+\begin{xframe}{Konec 7. části}
+\texttt{exit(0);}
+\end{xframe}
+
+
+
+
+\end{document}
+
+
+
+

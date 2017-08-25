@@ -1,0 +1,150 @@
+% !TEX TS-program = pdflatex
+% !TEX encoding = UTF-8 Unicode
+
+\documentclass{beamer}
+\usepackage[czech]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage{times}
+\usepackage[T1]{fontenc}
+\usepackage{verbatim}
+\usepackage{listings}
+\usepackage{xcolor}
+
+\mode<presentation>
+{
+	\usetheme{antibes}
+	\usecolortheme{orchid}
+}
+
+\setbeamertemplate{navigation symbols}{}
+
+\definecolor{cmtgreen}{RGB}{0,192,0}
+
+\begin{document}
+
+\title{C++; delete Java;}
+\subtitle{Část 2: RAII}
+\author{Kennny}
+\date{srpen 2017}
+
+\frame{\titlepage}
+
+\lstset{language=C++,
+        basicstyle=\ttfamily,
+        keywordstyle=\color{blue}\ttfamily,
+        stringstyle=\color{red}\ttfamily,
+        commentstyle=\color{cmtgreen}\ttfamily,
+        morecomment=[l][\color{magenta}]{\#}
+}
+
+\newenvironment{xframe}[1][]
+  {\begin{frame}[fragile,environment=xframe,#1]}
+  {\end{frame}}
+
+\begin{comment}
+\begin{xframe}{tttt}
+	\begin{itemize}
+		\item
+	\end{itemize}
+\end{xframe}
+\end{comment}
+
+
+
+\section{RAII}
+\subsection{Význam konstruktoru a destruktoru}
+
+
+
+\begin{xframe}{RAII}
+	\begin{itemize}
+		\item Resource Acquisition Is Initialization
+		\item využívá konstruktor a destruktor pro zabrání / uvolnění zdroje
+		\item prakticky vždy staticky alokováno
+		\item to umožňuje vázat RAII objekt na konkrétní scope
+	\end{itemize}
+\end{xframe}
+
+\begin{xframe}{RAII}
+	\begin{itemize}
+		\item je to ochrana proti zapomínání
+		\item zpohodlnění práce
+		\item často je navíc využita i explicitní scope pro přehlednost
+		\item na jednoduchých příkladech není moc vidět důležitost a užitečnost principu RAII
+	\end{itemize}
+\end{xframe}
+
+
+
+\subsection{Příklady}
+
+\begin{xframe}{Příklad kostry RAII struktury}
+
+\begin{lstlisting}[basicstyle=\fontsize{8}{9}\selectfont\ttfamily]
+struct WCKeyHolder
+{
+    public:
+        WCKeyHolder()
+        {
+            acquireKey();
+        }
+
+        ~WCKeyHolder()
+        {
+            releaseKey();
+        }
+}
+\end{lstlisting}
+
+\end{xframe}
+
+\begin{xframe}{Příklad použití RAII struktury}
+
+\begin{lstlisting}[basicstyle=\fontsize{8}{9}\selectfont\ttfamily]
+// sraci scope
+{
+    // konstruktor zabere zdroj
+    WCKeyHolder wckey;
+    
+    sit();
+    while (!ass.empty())
+        ass.pop();
+    wipe(ass);
+}
+// konec explicitni scope zapricini volani destruktoru
+// tedy uvolneni zdroje
+\end{lstlisting}
+
+\end{xframe}
+
+\begin{xframe}{RAII}
+	\begin{itemize}
+		\item spousty věcí v C++ STL nějakým způsobem utilizuje RAII
+		\item souborové streamy - otevírá a zavírá soubor
+		\item mutex a jeho lock\_guard - zabírá a uvolňuje mutex
+		\item smart pointery - zvyšují a snižují reference count
+		\item a další...
+	\end{itemize}
+\end{xframe}
+
+\begin{xframe}{Příklad}
+	\begin{itemize}
+		\item Prostor pro příklad 02\_a\_raii
+	\end{itemize}
+\end{xframe}
+
+
+
+
+\begin{xframe}{Konec 2. části}
+\texttt{exit(0);}
+\end{xframe}
+
+
+
+
+\end{document}
+
+
+
+

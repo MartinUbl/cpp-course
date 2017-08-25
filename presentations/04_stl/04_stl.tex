@@ -1,0 +1,433 @@
+% !TEX TS-program = pdflatex
+% !TEX encoding = UTF-8 Unicode
+
+\documentclass{beamer}
+\usepackage[czech]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage{times}
+\usepackage[T1]{fontenc}
+\usepackage{verbatim}
+\usepackage{listings}
+\usepackage{xcolor}
+
+\mode<presentation>
+{
+	\usetheme{antibes}
+	\usecolortheme{orchid}
+}
+
+\setbeamertemplate{navigation symbols}{}
+
+\definecolor{cmtgreen}{RGB}{0,192,0}
+
+\begin{document}
+
+\title{C++; delete Java;}
+\subtitle{Část 4: významné STL struktury}
+\author{Kennny}
+\date{srpen 2017}
+
+\frame{\titlepage}
+
+\lstset{language=C++,
+        basicstyle=\ttfamily,
+        keywordstyle=\color{blue}\ttfamily,
+        stringstyle=\color{red}\ttfamily,
+        commentstyle=\color{cmtgreen}\ttfamily,
+        morecomment=[l][\color{magenta}]{\#}
+}
+
+\newenvironment{xframe}[1][]
+  {\begin{frame}[fragile,environment=xframe,#1]}
+  {\end{frame}}
+
+\begin{comment}
+\begin{xframe}{tttt}
+	\begin{itemize}
+		\item
+	\end{itemize}
+\end{xframe}
+\end{comment}
+
+
+
+\section{STL}
+\subsection{Obecné}
+
+
+
+\begin{xframe}{Významné struktury}
+	\begin{itemize}
+		\item \texttt{string} - klasický řetězec
+		\item \texttt{vector} - dynamické pole
+		\item \texttt{list} - spojový seznam
+		\item \texttt{map} - key-value úložiště (red-black strom, seřazeno)
+		\item \texttt{set} - množina (seřazená)
+		\item \texttt{unordered\_map} - key-value úložiště (hash tabulka, neřazeno)
+		\item \texttt{unordered\_set} - množina (neřazená)
+	\end{itemize}
+\end{xframe}
+
+\begin{xframe}{Významné struktury}
+	\begin{itemize}
+		\item \texttt{queue} - fronta
+		\item \texttt{stack} - zásobník
+		\item \texttt{deque} - obousměrná fronta
+		\item \texttt{priority\_queue} - prioritní fronta
+		\item a další...
+	\end{itemize}
+\end{xframe}
+
+\subsection{Konkrétní struktury}
+
+\begin{xframe}{std::string}
+	\begin{itemize}
+		\item \texttt{\#include <string>}
+		\item obaluje dynamickou práci s řetězci
+		\item odstiňuje nutnou realokaci, přetěžuje operátor +
+		\item implementuje pomocné metody (substr, find, ...)
+		\item pro porovnání přetěžuje operátory == a !=
+	\end{itemize}
+\end{xframe}
+
+\begin{xframe}{Příklad}
+	\begin{itemize}
+		\item Prostor pro příklad 04\_a\_string
+	\end{itemize}
+\end{xframe}
+
+\begin{xframe}{Vsuvka: iterátor}
+	\begin{itemize}
+		\item jednotný obalový prvek sloužící pro průchod
+		\item každý STL kontejner ho má
+		\item zpravidla se získává metodou \texttt{begin()} (popř. \texttt{rbegin()}, pokud to kontejner podporuje)
+		\item přetěžuje operátor ++ (posun na další prvek v kontejneru)
+		\item některé přetěžují operátor + (posun o N prvků v kontejneru), pokud to daný typ podporuje
+		\item prvek na pozici iterátoru se získá dereferencí (přetěžuje unární operátor*)
+\begin{lstlisting}[basicstyle=\fontsize{8}{9}\selectfont\ttfamily]
+int hodnota = *iter;
+\end{lstlisting}
+	\end{itemize}
+\end{xframe}
+
+\begin{xframe}{std::vector}
+	\begin{itemize}
+		\item \texttt{\#include <vector>}
+		\item šablonový typ
+		\item obaluje dynamické pole daného typu
+\begin{lstlisting}[basicstyle=\fontsize{8}{9}\selectfont\ttfamily]
+std::vector<float> fVector;
+std::vector<int> iVector;
+std::vector<std::string> stringVector;
+\end{lstlisting}
+		\item rezervuje prostor "napřed"
+		\item přetěžuje operátor []
+		\item vnitřně jde o souvislou paměť
+	\end{itemize}
+\end{xframe}
+
+\begin{xframe}{std::vector}
+	\begin{itemize}
+		\item vkládání na konec (O(1))
+			\begin{itemize}
+				\item metodou \texttt{push\_back}
+				\item metodou \texttt{resize} a přes index
+				\item metodou \texttt{reserve} a následně \texttt{push\_back}
+			\end{itemize}
+		\item vkládání obecné (O(n))
+			\begin{itemize}
+				\item metodou \texttt{insert}
+			\end{itemize}
+		\item mazání z konce (O(1))
+			\begin{itemize}
+				\item metodou \texttt{pop\_back}
+			\end{itemize}
+		\item mazání obecné (O(n))
+			\begin{itemize}
+				\item metodou \texttt{erase} pomocí iterátoru
+			\end{itemize}
+		\item přístup k prvkům (O(1))
+			\begin{itemize}
+				\item metodou \texttt{at()}
+				\item operátorem []
+			\end{itemize}
+		\item průchod (O(n))
+			\begin{itemize}
+				\item přes indexy od 0 až do \texttt{size()}
+				\item iterátory od \texttt{begin()} až do \texttt{end()}
+				\item range-based for
+			\end{itemize}
+	\end{itemize}
+\end{xframe}
+
+\begin{xframe}{Příklad}
+	\begin{itemize}
+		\item Prostor pro příklad 04\_b\_vector
+	\end{itemize}
+\end{xframe}
+
+
+\begin{xframe}{std::list}
+	\begin{itemize}
+		\item \texttt{\#include <list>}
+		\item šablonový typ
+		\item obaluje spojový seznam daného typu
+\begin{lstlisting}[basicstyle=\fontsize{8}{9}\selectfont\ttfamily]
+std::list<float> fList;
+std::list<int> iList;
+std::list<std::string> stringList;
+\end{lstlisting}
+		\item analogie k LinkedList z Javy
+	\end{itemize}
+\end{xframe}
+
+\begin{xframe}{std::list}
+	\begin{itemize}
+		\item vkládání (O(1))
+			\begin{itemize}
+				\item metodou \texttt{push\_back} (na konec)
+				\item metodou \texttt{insert} (kamkoliv)
+			\end{itemize}
+		\item mazání (O(1))
+			\begin{itemize}
+				\item metodou \texttt{erase} pomocí iterátoru nebo rozsahu iterátorů
+			\end{itemize}
+		\item přístup k prvkům (O(n))
+			\begin{itemize}
+				\item iterace od začátku ruční
+				\item \texttt{begin()} a \texttt{std::advance}
+			\end{itemize}
+		\item průchod (O(n))
+			\begin{itemize}
+				\item iterátory od \texttt{begin()} až do \texttt{end()}
+				\item range-based for
+			\end{itemize}
+	\end{itemize}
+\end{xframe}
+
+\begin{xframe}{Příklad}
+	\begin{itemize}
+		\item Prostor pro příklad 04\_c\_list
+	\end{itemize}
+\end{xframe}
+
+
+\begin{xframe}{std::map}
+	\begin{itemize}
+		\item \texttt{\#include <map>}
+		\item šablonový typ
+		\item obaluje key-value úložiště zadaných typů
+\begin{lstlisting}[basicstyle=\fontsize{8}{9}\selectfont\ttfamily]
+std::map<int, float> ifMap;
+std::map<long, std::string> intStringMap;
+std::map<std::string, int> stringIntMap;
+\end{lstlisting}
+		\item implementace red-black stromem
+		\item pro uložení musí typ být porovnatelný operátorem <
+			\begin{itemize}
+				\item např. int, long, std::string toto splňují (std::string přetěžuje operátor <)
+				\item pozor ale na \texttt{const char*} - jde o adresu, tedy číslo
+			\end{itemize}
+	\end{itemize}
+\end{xframe}
+
+\begin{xframe}{std::map}
+	\begin{itemize}
+		\item vkládání (O(log n))
+			\begin{itemize}
+				\item užitím klíče a operátoru []
+				\item metodou \texttt{insert} (vkládat pár)
+			\end{itemize}
+		\item mazání (O(log n))
+			\begin{itemize}
+				\item metodou \texttt{erase} (klíč nebo iterátor)
+			\end{itemize}
+		\item přístup k prvkům (O(log n))
+			\begin{itemize}
+				\item užitím klíče a operátoru [] (! pokud neexistuje, vytvoří ho !)
+				\item získání iterátoru metodou \texttt{find()}
+			\end{itemize}
+		\item průchod (O(n))
+			\begin{itemize}
+				\item iterátory od \texttt{begin()} až do \texttt{end()}
+				\item range-based for
+			\end{itemize}
+	\end{itemize}
+\end{xframe}
+
+\begin{xframe}{std::map}
+	\begin{itemize}
+		\item co když klíč nemá operátor < přímo, nemá ho ani přetížen, nebo jednoduše vyžadujeme jiné chování?
+		\item --> dodefinujeme si buď operátor, nebo definujeme jiný komparátor mapy
+		\item operátor< - známe
+		\item komparátor - funkce, lambda funkce nebo funktor (struktura s přetíženým operátorem())
+\begin{lstlisting}[basicstyle=\fontsize{8}{9}\selectfont\ttfamily]
+// const char* komparacni funktor pro mapu
+struct constchar_comparator
+{
+    bool operator()(const char *a, const char *b) const
+    {
+        return strcmp(a, b) < 0;
+    }
+};
+\end{lstlisting}
+		\item prvky jsou stejné, pokud \texttt{!(a < b || b < a)}
+	\end{itemize}
+\end{xframe}
+
+\begin{xframe}{Příklad}
+	\begin{itemize}
+		\item Prostor pro příklad 04\_d\_map
+	\end{itemize}
+\end{xframe}
+
+
+
+\begin{xframe}{std::set}
+	\begin{itemize}
+		\item \texttt{\#include <set>}
+		\item šablonový typ
+		\item obaluje množinu daného typu
+\begin{lstlisting}[basicstyle=\fontsize{8}{9}\selectfont\ttfamily]
+std::set<float> fSet; // muze byt nesikovne (float aritmetika)!
+std::set<int> iSet;
+std::set<std::string> stringSet;
+\end{lstlisting}
+	\end{itemize}
+\end{xframe}
+
+\begin{xframe}{std::set}
+	\begin{itemize}
+		\item vkládání (O(log n))
+			\begin{itemize}
+				\item metodou \texttt{insert}
+			\end{itemize}
+		\item mazání (O(log n))
+			\begin{itemize}
+				\item metodou \texttt{erase} pomocí klíče nebo iterátoru
+			\end{itemize}
+		\item detekce přítomnosti prvku (O(log n))
+			\begin{itemize}
+				\item užitím \texttt{find()}
+			\end{itemize}
+		\item průchod (O(n))
+			\begin{itemize}
+				\item iterátory od \texttt{begin()} až do \texttt{end()}
+				\item range-based for
+			\end{itemize}
+	\end{itemize}
+\end{xframe}
+
+\begin{xframe}{std::set}
+	\begin{itemize}
+		\item pro komparátor platí stejná pravidla jako u mapy
+		\item není vhodné pro nahrazování vectoru / listu, každý container má svůj účel
+	\end{itemize}
+\end{xframe}
+
+\begin{xframe}{Příklad}
+	\begin{itemize}
+		\item Prostor pro příklad 04\_e\_set
+	\end{itemize}
+\end{xframe}
+
+
+\begin{xframe}{std::unordered\_map}
+	\begin{itemize}
+		\item \texttt{\#include <unordered\_map>}
+		\item rozhraní stejné jako std::map
+		\item rozdíl v implementaci - hash tabulka
+		\item v podstatě analogie k HashMap v Javě
+		\item přidání, přístup k prvku a mazání průměrně O(1)
+		\item nezaručuje pořadí prvků
+		\item proti obyčejné std::map zabírá více paměti
+	\end{itemize}
+\end{xframe}
+
+\begin{xframe}{std::unordered\_set}
+	\begin{itemize}
+		\item \texttt{\#include <unordered\_set>}
+		\item úplně stejná analogie jako std::map a std::unordered\_map
+	\end{itemize}
+\end{xframe}
+
+\subsection{Vedlejší struktury}
+
+\begin{xframe}{std::queue}
+	\begin{itemize}
+		\item \texttt{\#include <queue>}
+		\item klasická implementace fronty
+		\item důležité metody:
+			\begin{itemize}
+				\item \texttt{push()} - vložit prvek
+				\item \texttt{front()} - přední prvek (kandidát na výběr)
+				\item \texttt{pop()} - zahození předního prvku
+				\item \texttt{empty()} - je fronta prázdná?
+				\item \texttt{size()} - počet prvků ve frontě
+			\end{itemize}
+	\end{itemize}			
+\begin{lstlisting}[basicstyle=\fontsize{8}{9}\selectfont\ttfamily]
+// vyprazdneni (zpracovani) fronty
+while (!q.empty())
+{
+    TypPrvku& el = q.front();
+
+    // prace s prvkem
+    
+    ique.pop();
+}
+\end{lstlisting}
+\end{xframe}
+
+
+\begin{xframe}{std::stack}
+	\begin{itemize}
+		\item \texttt{\#include <stack>}
+		\item klasická implementace zásobníku
+		\item důležité metody:
+			\begin{itemize}
+				\item \texttt{push()} - vložit prvek
+				\item \texttt{top()} - prvek na vrcholu (kandidát na výběr)
+				\item \texttt{pop()} - zahození předního prvku
+				\item \texttt{empty()} - je fronta prázdná?
+				\item \texttt{size()} - počet prvků ve frontě
+			\end{itemize}
+	\end{itemize}			
+\begin{lstlisting}[basicstyle=\fontsize{8}{9}\selectfont\ttfamily]
+// vyprazdneni (zpracovani) zasobniku
+while (!q.empty())
+{
+    TypPrvku& el = q.top();
+
+    // prace s prvkem
+    
+    ique.pop();
+}
+\end{lstlisting}
+\end{xframe}
+
+\begin{xframe}{Příklad}
+	\begin{itemize}
+		\item Prostor pro příklad 04\_f\_misc
+	\end{itemize}
+\end{xframe}
+
+
+
+
+
+
+
+
+\begin{xframe}{Konec 4. části}
+\texttt{exit(0);}
+\end{xframe}
+
+
+
+
+\end{document}
+
+
+
+

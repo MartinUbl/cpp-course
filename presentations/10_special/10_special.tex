@@ -1,0 +1,141 @@
+% !TEX TS-program = pdflatex
+% !TEX encoding = UTF-8 Unicode
+
+\documentclass{beamer}
+\usepackage[czech]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage{times}
+\usepackage[T1]{fontenc}
+\usepackage{verbatim}
+\usepackage{listings}
+\usepackage{xcolor}
+
+\mode<presentation>
+{
+	\usetheme{antibes}
+	\usecolortheme{orchid}
+}
+
+\setbeamertemplate{navigation symbols}{}
+
+\definecolor{cmtgreen}{RGB}{0,192,0}
+
+\begin{document}
+
+\title{C++; delete Java;}
+\subtitle{Část 10: speciality}
+\author{Kennny}
+\date{srpen 2017}
+
+\frame{\titlepage}
+
+\lstset{language=C++,
+        basicstyle=\ttfamily,
+        keywordstyle=\color{blue}\ttfamily,
+        stringstyle=\color{red}\ttfamily,
+        commentstyle=\color{cmtgreen}\ttfamily,
+        morecomment=[l][\color{magenta}]{\#}
+}
+
+\newenvironment{xframe}[1][]
+  {\begin{frame}[fragile,environment=xframe,#1]}
+  {\end{frame}}
+
+\begin{comment}
+\begin{xframe}{tttt}
+	\begin{itemize}
+		\item
+	\end{itemize}
+\end{xframe}
+\end{comment}
+
+
+
+\section{Speciality}
+\subsection{Jazyk}
+
+
+
+\begin{xframe}{constexpr}
+	\begin{itemize}
+		\item klíčové slovo \texttt{constexpr}
+		\item umožňuje vyhodnocení v čase kompilace, pokud to je možné
+		\item pokud ne, vyhodnotí za běhu jako normálně
+		\item \texttt{constexpr} proměnné a funkce
+		\item hodí se např. na vyhodnocení magic constant nebo obecně sady hodnot, o které víme, že pro daný argument nikdy jiná nebude
+	\end{itemize}
+\end{xframe}
+
+\begin{xframe}{constexpr}
+	\begin{itemize}
+		\item \texttt{constexpr} funkce funguje pouze, pokud je její návratová hodnota přiřazována do \texttt{constexpr} konstanty, jinak je vyhodnocena v čase běhu
+	\end{itemize}
+	
+\begin{lstlisting}[basicstyle=\fontsize{8}{9}\selectfont\ttfamily]
+constexpr int magicTransform(const int arg)
+{
+    return arg*5 + 10;
+}
+
+// provede se v case kompilace
+constexpr int arg1 = magicTransform(15);
+// provede se az za behu
+int arg2 = magicTransform(99);
+\end{lstlisting}
+\end{xframe}
+
+\begin{xframe}{Příklad}
+	\begin{itemize}
+		\item Prostor pro příklad 10\_a\_constexpr
+	\end{itemize}
+\end{xframe}
+
+
+% TODO
+
+
+\begin{xframe}{Příklad}
+	\begin{itemize}
+		\item Prostor pro příklad 10\_b\_lambda
+	\end{itemize}
+\end{xframe}
+
+\begin{xframe}{Příklad}
+	\begin{itemize}
+		\item Prostor pro příklad 10\_c\_auto
+	\end{itemize}
+\end{xframe}
+
+\begin{xframe}{Příklad}
+	\begin{itemize}
+		\item Prostor pro příklad 10\_d\_stl
+	\end{itemize}
+\end{xframe}
+
+\begin{xframe}{Příklad}
+	\begin{itemize}
+		\item Prostor pro příklad 10\_e\_enum\_class
+	\end{itemize}
+\end{xframe}
+
+\begin{xframe}{Příklad}
+	\begin{itemize}
+		\item Prostor pro příklad 10\_f\_range\_based\_for
+	\end{itemize}
+\end{xframe}
+
+
+
+
+\begin{xframe}{Konec 10. části}
+\texttt{exit(0);}
+\end{xframe}
+
+
+
+
+\end{document}
+
+
+
+
