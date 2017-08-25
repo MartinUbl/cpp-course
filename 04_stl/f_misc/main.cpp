@@ -123,6 +123,7 @@ int main(int argc, char** argv)
     std::string jmeno;
     double vyska, hmotnost;
 
+    // std::tie - roztrzeni tuple na jednotlive hodnoty
     std::tie(jmeno, vyska, hmotnost) = getBodyProportions(0);
 
     std::cout << "index 0: Jmeno: " << jmeno << ", vyska: " << vyska << ", hmotnost: " << hmotnost << std::endl;

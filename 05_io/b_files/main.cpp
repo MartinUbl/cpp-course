@@ -79,7 +79,7 @@ int main(int argc, char** argv)
     {
         // std::ios_base::in je priznak pro "pro cteni" - zde neni nutne uvadet, pro ifstream je implicitni
 
-        std::ifstream ff("C:\\Temp\\prvni.txt", std::ios_base::in);
+        std::ifstream ff("C:\\Temp\\prvni.txt", std::ios::in);
 
         // naivni parser, ale pro zakladni ulohy dostacuje
         while (std::getline(ff, s1, ';') && std::getline(ff, s2))
@@ -94,7 +94,7 @@ int main(int argc, char** argv)
     // scope dalsiho ifstreamu
     {
         // precteme si hlavicku BMP obrazku
-        std::ifstream ff("C:\\Temp\\obrazek.bmp", std::ios_base::in | std::ios_base::binary);
+        std::ifstream ff("C:\\Temp\\obrazek.bmp", std::ios::in | std::ios::binary);
 
         BMPHeader header;
         ff.read(header.identifier, 2);
@@ -115,7 +115,7 @@ int main(int argc, char** argv)
     // scope dalsiho ifstreamu
     {
         // precteme si hlavicku BMP obrazku
-        std::ifstream ff("C:\\Temp\\obrazek.bmp", std::ios_base::in | std::ios_base::binary);
+        std::ifstream ff("C:\\Temp\\obrazek.bmp", std::ios::in | std::ios::binary);
 
         BMPHeader header;
         ff >> header;
@@ -145,7 +145,7 @@ int main(int argc, char** argv)
 
     // scope ofstreamu; append za konec souboru
     {
-        std::ofstream ff("C:\\Temp\\vystup.txt", std::ios_base::out | std::ios_base::app);
+        std::ofstream ff("C:\\Temp\\vystup.txt", std::ios::out | std::ios::app);
 
         ff << "'Member Chewbacca?" << std::endl;
     }
@@ -157,7 +157,7 @@ int main(int argc, char** argv)
 
     // scope ofstreamu; zakladni priklad pouziti
     {
-        std::ofstream ff("C:\\Temp\\vystup.bin", std::ios_base::out | std::ios_base::binary);
+        std::ofstream ff("C:\\Temp\\vystup.bin", std::ios::out | std::ios::binary);
 
         for (size_t i = 0; i < 10; i++)
         {

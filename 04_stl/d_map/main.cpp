@@ -21,6 +21,7 @@ class Tlacitko
         }
 };
 
+// komparacni funktor pro mapu a const char* typ
 struct constchar_comparator
 {
     bool operator()(const char *a, const char *b) const
@@ -50,7 +51,7 @@ int main(int argc, char** argv)
     for (std::map<int, double>::iterator itr = m1.begin(); itr != m1.end(); ++itr)
         std::cout << "Key: " << itr->first << ", Value: " << itr->second << std::endl;
 
-    // pruchod - range-based for (pozor, zde ne referenci - jedine const referenci; mapa si zajistuje, ze pri pruchodu nebude nic modifikovano)
+    // pruchod - range-based for (pozor, zde jen hodnotou nebo const referenci; mapa si zajistuje, ze pri pruchodu nebude modifikovan klic)
     for (std::pair<int, double> item : m1)
         std::cout << "Key: " << item.first << ", Value: " << item.second << std::endl;
 
@@ -64,8 +65,9 @@ int main(int argc, char** argv)
     std::cout << m1[55] << std::endl;
 
 
-    // pruchod s const referenci
-    for (std::pair<int, double> const& item : m1)
+    // pruchod s const referenci, popr. staci konstantni klic
+    //for (std::pair<int, double> const& item : m1)
+    for (std::pair<const int, double>& item : m1)
         std::cout << "Key: " << item.first << ", Value: " << item.second << std::endl;
 
 

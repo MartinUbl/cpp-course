@@ -10,7 +10,7 @@ Pig::Pig()
 
 ElePig Pig::MakeLove(Elephant& e)
 {
-    // !!!
+    // !!! tohle uz vola Elephant, zacyklikli bychom se
     //return e.MakeLove(*this);
 
     return ElePig(e, *this);

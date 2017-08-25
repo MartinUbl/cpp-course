@@ -105,5 +105,21 @@ int main(int argc, char** argv)
 
 
 
+    std::cout << "----------- potreba zamknout vice mutexu" << std::endl;
+
+    std::mutex mtx_1, mtx_2;
+
+    {
+        std::unique_lock<std::mutex> lck_1(mtx_1, std::defer_lock);
+        std::unique_lock<std::mutex> lck_2(mtx_2, std::defer_lock);
+
+        // zamky zatim nejsou zamceny!
+
+        std::lock(lck_1, lck_2);
+
+        // zamceny oba mutexy bez rizika deadlocku
+    }
+
+
     return 0;
 }

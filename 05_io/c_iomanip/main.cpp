@@ -8,13 +8,13 @@ int main(int argc, char** argv)
     // cista scope
     {
         std::ostringstream ss;
-        ss << "0x" << std::hex << 192;
+        ss << std::showbase << std::hex << 192;
         std::cout << ss.str() << std::endl;
 
         ss.str(""); // reinicializace streamu prazdnym stringem
 
         // std::hex modifier zustane! meni stav streamu jako takoveho
-        ss << "0x" << 192;
+        ss << 192;
         std::cout << ss.str() << std::endl;
     }
 
