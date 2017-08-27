@@ -97,12 +97,21 @@ int main(int argc, char** argv)
 
     std::cout << "-------- Lambda funkce 5 - navratova hodnota a parametry" << std::endl;
 
-    // referenci predame treba someInt, hodnotou anotherInt
-    std::function<int(int, int)> f5 = [=](int a, int b) {
+    // navratova hodnota - zde je explicitne urcena v typu
+    std::function<double(double, double)> f5 = [=](double a, double b) {
         return a*a + b*b;
     };
 
-    std::cout << "f5(2,5) = " << f5(2,5) << std::endl;
+    std::cout << "f5(2.2,5.2) = " << f5(2.2,5.2) << std::endl;
+
+    // navratova hodnota - jelikoz "auto" rika kompilatoru, aby typ vydedukoval,
+    // bude dedukovat i navratovou hodnotu; abychom predesli jinemu odhadu nez chceme, je mozne
+    // hodnotu specifikovat syntaxi s "->"
+    auto f5_1 = [=](double a, double b) -> int {
+        return a*a + b*b;
+    };
+
+    std::cout << "f5_1(2.2,5.2) = " << f5_1(2.2, 5.2) << std::endl;
 
 
 

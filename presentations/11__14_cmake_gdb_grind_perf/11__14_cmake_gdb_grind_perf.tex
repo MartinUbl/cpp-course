@@ -1,0 +1,474 @@
+% !TEX TS-program = pdflatex
+% !TEX encoding = UTF-8 Unicode
+
+\documentclass{beamer}
+\usepackage[czech]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage{times}
+\usepackage[T1]{fontenc}
+\usepackage{verbatim}
+\usepackage{listings}
+\usepackage{xcolor}
+
+\mode<presentation>
+{
+	\usetheme{antibes}
+	\usecolortheme{wolverine}
+}
+
+\setbeamertemplate{navigation symbols}{}
+
+\begin{document}
+
+\title{C++ support}
+\subtitle{Část 11 - 14: CMake, GDB, Valgrind, Perf}
+\author{Kennny}
+\date{srpen 2017}
+
+\frame{\titlepage}
+
+\lstset{language=bash,
+        basicstyle=\ttfamily,
+        keywordstyle=\color{blue}\ttfamily,
+        stringstyle=\color{red}\ttfamily,
+        commentstyle=\color{cmtgreen}\ttfamily,
+        morecomment=[l][\color{magenta}]{\#}
+}
+
+\newenvironment{xframe}[1][]
+  {\begin{frame}[fragile,environment=xframe,#1]}
+  {\end{frame}}
+
+\begin{comment}
+\begin{xframe}{tttt}
+	\begin{itemize}
+		\item
+	\end{itemize}
+\end{xframe}
+\end{comment}
+
+
+
+\section{CMake}
+\subsection{Obecné}
+
+\begin{xframe}{CMake úvod}
+	\begin{itemize}
+		\item nástroj pro dynamické generování konfigurací k sestavení
+		\item generuje MSVS solutions, makefile, Codeblocks projekty, atd...
+		\item vždy CLI utilita
+		\item nyní i GUI
+	\end{itemize}
+\end{xframe}
+
+\begin{xframe}{CMakeLists.txt}
+	\begin{itemize}
+		\item root soubor
+		\item zpravidla obsahuje definici min. verze
+\begin{lstlisting}[basicstyle=\fontsize{8}{9}\selectfont\ttfamily]
+CMAKE_MINIMUM_REQUIRED(VERSION 2.4)
+\end{lstlisting}
+		\item vždy obsahuje název celého projektu (workspace, solution)
+\begin{lstlisting}[basicstyle=\fontsize{8}{9}\selectfont\ttfamily]
+PROJECT(my-fancy-cpp-app)
+\end{lstlisting}
+		\item pro přehlednost je možné, aby podsložky obsahovaly také CMakeLists.txt, který bude načten odděleně; vyvoláme ho přidáním podsložky
+\begin{lstlisting}[basicstyle=\fontsize{8}{9}\selectfont\ttfamily]
+ADD_SUBDIRECTORY(src)
+\end{lstlisting}
+		\item nic z toho zatím nemá vliv na strukturu projektu
+	\end{itemize}
+\end{xframe}
+
+\subsection{Příkazy}
+
+\begin{xframe}{Spustitelný soubor}
+	\begin{itemize}
+		\item přidání spustitelného souboru k sestavení (resp. projektu pro MSVS v rámci solution)
+\begin{lstlisting}[basicstyle=\fontsize{8}{9}\selectfont\ttfamily]
+ADD_EXECUTABLE(<target-name> <file list...>)
+\end{lstlisting}
+		\item např.
+\begin{lstlisting}[basicstyle=\fontsize{8}{9}\selectfont\ttfamily]
+ADD_EXECUTABLE(my-executable main.cpp module.cpp othermodule.cpp)
+\end{lstlisting}
+		\item toto vybuildí soubor \texttt{my-executable} (resp. \texttt{my-executable.exe} na Windows)
+		\item má další možné parametry, pro základní pochopení nejsou nutné
+	\end{itemize}
+\end{xframe}
+
+\begin{xframe}{Knihovny}
+	\begin{itemize}
+		\item přidání knihovny k sestavení (resp. projektu pro MSVS v rámci solution) probíhá analogicky
+\begin{lstlisting}[basicstyle=\fontsize{8}{9}\selectfont\ttfamily]
+ADD_LIBRARY(<target-name> [library type] <file list...>)
+\end{lstlisting}
+		\item kde \texttt{[library type]} může být např.:
+			\begin{itemize}
+				\item \texttt{SHARED} - dynamicky linkovaná knihovna (.dll nebo .so)
+				\item \texttt{STATIC} - staticky linkovaná knihovna (.lib nebo .a)
+			\end{itemize}
+		\item např.
+\begin{lstlisting}[basicstyle=\fontsize{8}{9}\selectfont\ttfamily]
+ADD_LIBRARY(my-toolset STATIC libmain.cpp a.cpp b.cpp)
+\end{lstlisting}
+		\item toto vybuildí soubor \texttt{my-toolset.a} (resp. \texttt{my-executable.lib} na Windows)
+	\end{itemize}
+\end{xframe}
+
+\begin{xframe}{Include cesty}
+	\begin{itemize}
+		\item include cesty se dají přidat globálně / pro jeden cíl
+\begin{lstlisting}[basicstyle=\fontsize{8}{9}\selectfont\ttfamily]
+INCLUDE_DIRECTORIES(<dirs>)
+TARGET_INCLUDE_DIRECTORIES(<target> <specifier> <dirs>)
+\end{lstlisting}
+		\item hodnota \texttt{specifier} může být
+			\begin{itemize}
+				\item \texttt{INTERFACE}
+				\item \texttt{PUBLIC} - vystačíme si s touto
+				\item \texttt{PRIVATE}
+			\end{itemize}
+		\item např. pro přidání složky \texttt{include}
+\begin{lstlisting}[basicstyle=\fontsize{8}{9}\selectfont\ttfamily]
+INCLUDE_DIRECTORIES(${INCLUDE_DIRECTORIES} include/)
+TARGET_INCLUDE_DIRECTORIES(my-executable PUBLIC
+     ${INCLUDE_DIRECTORIES} include/)
+\end{lstlisting}
+	\end{itemize}
+\end{xframe}
+
+\begin{xframe}{Linkování knihoven}
+	\begin{itemize}
+		\item linkování knihoven taktéž globálně / pro jeden cíl
+		\item pozor - globálně je třeba před přidáním cílů
+\begin{lstlisting}[basicstyle=\fontsize{8}{9}\selectfont\ttfamily]
+LINK_LIBRARIES(<libraries>)
+TARGET_LINK_LIBRARIES(<target> <libraries>)
+\end{lstlisting}
+		\item např.
+\begin{lstlisting}[basicstyle=\fontsize{8}{9}\selectfont\ttfamily]
+LINK_LIBRARIES(my-toolset)
+TARGET_LINK_LIBRARIES(my-executable my-toolset)
+\end{lstlisting}
+	\end{itemize}
+\end{xframe}
+
+\begin{xframe}{Hledání externích knihoven}
+	\begin{itemize}
+		\item je potřeba modul CMake
+		\item nějaké má CMake přibalené s sebou
+		\item modul je možno vyvolat
+\begin{lstlisting}[basicstyle=\fontsize{8}{9}\selectfont\ttfamily]
+FIND_PACKAGE(<packagename> [flag])
+\end{lstlisting}
+		\item \texttt{flag} nás bude zajímat jen jedna: \texttt{REQUIRED} - nelze bez této knihovny pokračovat
+		\item např.
+\begin{lstlisting}[basicstyle=\fontsize{8}{9}\selectfont\ttfamily]
+FIND_PACKAGE(OpenSSL REQUIRED)
+\end{lstlisting}
+		\item modul nastavuje proměnné
+		\item ostatní silně specifické
+	\end{itemize}
+\end{xframe}
+
+\begin{xframe}{Hledání externích knihoven}
+	\begin{itemize}
+		\item interní moduly CMake většinou nastavují nějak standardizované proměnné
+		\item vždy \texttt{<packagename>\_FOUND} pokud se knihovnu podaří nalézt
+		\item často \texttt{<packagename>\_INCLUDE\_DIR} - kde hledat hlavičkové soubory
+		\item často \texttt{<packagename>\_LIBRARIES} - seznam knihoven k linkování
+		\item všechny moduly, které s sebou CMake nese, jsou zdokumentovány: \url{https://cmake.org/cmake/help/latest/manual/cmake-modules.7.html}
+	\end{itemize}
+\end{xframe}
+
+\begin{xframe}{Parametrizace překladu}
+	\begin{itemize}
+		\item často je potřeba předat nějaký přepínač pro parametrizaci sestavení
+		\item opět lze globálně i pro target
+\begin{lstlisting}[basicstyle=\fontsize{8}{9}\selectfont\ttfamily]
+ADD_DEFINITIONS(<defines>)
+TARGET_COMPILE_DEFINITIONS(<target> <specifier> <defines>)
+\end{lstlisting}
+		\item pozor, defines musí být včetně prefixu \texttt{-D} pro preprocesorové direktivy (aby se chovaly jako \texttt{\#define})
+		\item např.
+\begin{lstlisting}[basicstyle=\fontsize{8}{9}\selectfont\ttfamily]
+ADD_DEFINITIONS(-DDEV_BUILD)
+TARGET_COMPILE_DEFINITIONS(my-executable PUBLIC -DDEV_BUILD)
+\end{lstlisting}
+	\end{itemize}
+\end{xframe}
+
+
+\begin{xframe}{Vyhledání souborů}
+	\begin{itemize}
+		\item abychom nemuseli otrocky vypisovat seznam souborů, lze je nechat vyhledat
+		\item po vyhledání jsou uloženy do proměnné
+		\item využijeme příkaz \texttt{FILE}, který má širší využití
+\begin{lstlisting}[basicstyle=\fontsize{8}{9}\selectfont\ttfamily]
+FILE(<operation> <parameters>)
+\end{lstlisting}
+		\item pro vyhledání souborů v dané složce s příponou .cpp a .h např.:
+\begin{lstlisting}[basicstyle=\fontsize{8}{9}\selectfont\ttfamily]
+FILE(GLOB_RECURSE my_app_sources ./ *.cpp *.h)
+\end{lstlisting}
+		\item operace \texttt{GLOB\_RECURSE} projde i podsložky
+		\item pokud nechceme, lze použít jen \texttt{GLOB}
+	\end{itemize}
+\end{xframe}
+
+\begin{xframe}{Řídicí struktury}
+	\begin{itemize}
+		\item CMake podporuje všemožné řídicí struktury
+		\item nejjednodušší je \texttt{IF}
+		\item syntaxe se myšlenkou podobá podmínkám např. z bashe
+\begin{lstlisting}[basicstyle=\fontsize{8}{9}\selectfont\ttfamily]
+IF(<expression>)
+    # something
+ELSE()
+    # something else
+ENDIF()
+\end{lstlisting}
+		\item výrazem může být pouhá proměnná - pak se ověřuje její existence
+		\item nebo např. porovnávací výraz
+	\end{itemize}
+\end{xframe}
+
+\begin{xframe}{Řídicí struktury}
+	\begin{itemize}
+		\item příklad - podařilo se nalézt OpenSSL knihovnu?
+\begin{lstlisting}[basicstyle=\fontsize{8}{9}\selectfont\ttfamily]
+IF(OpenSSL_FOUND)
+    # great!
+ENDIF()
+\end{lstlisting}
+		\item příklad - je proměnná nastavena na hodnotu?
+\begin{lstlisting}[basicstyle=\fontsize{8}{9}\selectfont\ttfamily]
+IF(MY_VARIABLE STREQUAL "windows")
+    # great!
+ENDIF()
+\end{lstlisting}
+		\item a další, viz \url{https://cmake.org/cmake/help/latest/command/if.html}
+	\end{itemize}
+\end{xframe}
+
+\begin{xframe}{Výstup do konzole}
+	\begin{itemize}
+		\item občas se hodí oznámit něco do konzole
+\begin{lstlisting}[basicstyle=\fontsize{8}{9}\selectfont\ttfamily]
+MESSAGE([mode] "message")
+\end{lstlisting}
+		\item módy
+			\begin{itemize}
+				\item \texttt{STATUS} - diagnostický výstup
+				\item \texttt{WARNING}, \texttt{AUTHOR\_WARNING} - varování, nezastaví provádění
+				\item \texttt{SEND\_ERROR} - chyba, nedovolí vygenerovat projekt
+				\item \texttt{FATAL\_ERROR} - chyba, okamžitě zastaví provádění
+				\item \texttt{DEPRECATION} - deprecated varování (zastaví, pokud je nastaveno)
+			\end{itemize}
+		\item např.
+\begin{lstlisting}[basicstyle=\fontsize{8}{9}\selectfont\ttfamily]
+MESSAGE(FATAL_ERROR "Could not find OpenSSL!")
+\end{lstlisting}
+	\end{itemize}
+\end{xframe}
+
+\begin{xframe}{Příklad}
+	\begin{itemize}
+		\item Prostor pro příklad 11\_cmake
+	\end{itemize}
+\end{xframe}
+
+\section{Valgrind}
+\subsection{Poznámky}
+
+\begin{xframe}{Poznámky k memory leak Valgrind příkladům}
+	\begin{itemize}
+		\item byly připraveny příklady na chyby vedoucí k memory leakům, co mohou v C++ vzniknout
+		\item oba zdůrazňují, proč je vhodné používat konstrukce moderního C++ (často založené na RAII)
+		\item v příkladech je návod na sestavení i na spuštění memchecku
+	\end{itemize}
+\end{xframe}
+
+\begin{xframe}{Příklad}
+	\begin{itemize}
+		\item Prostor pro příklad 12\_a\_leak a 12\_b\_leak
+	\end{itemize}
+\end{xframe}
+
+\begin{xframe}{Poznámky k buffer overrun Valgrind příkladu}
+	\begin{itemize}
+		\item byl připraven příklad demonstrující chybu vedoucí k přesažení bufferu (pole, vyhrazené paměti, ..)
+		\item opět zdůrazňuje důležitost např. STL containerů
+		\item v příkladech je návod na sestavení i na spuštění sgchecku
+	\end{itemize}
+\end{xframe}
+
+\begin{xframe}{Příklad}
+	\begin{itemize}
+		\item Prostor pro příklad 12\_c\_range
+	\end{itemize}
+\end{xframe}
+
+\section{GDB}
+\subsection{O GDB}
+
+\begin{xframe}{GDB}
+	\begin{itemize}
+		\item zaměříme se na použití pro diagnostiku segfaultů
+		\item jde samozřejmě o plnohodnotný debugger se spoustou funkcí
+	\end{itemize}
+\end{xframe}
+
+\subsection{Použití}
+
+\begin{xframe}{Použití}
+	\begin{itemize}
+		\item lze spustit program rovnou pod GDB
+\begin{lstlisting}[basicstyle=\fontsize{8}{9}\selectfont\ttfamily]
+gdb my-program
+\end{lstlisting}
+		\item to spustí prostředí GDB
+		\item program lze spustit příkazem \texttt{run}
+		\item zastavit lze stisknutím ctrl-C
+		\item popř. breakpointem nebo signálem od systému (třeba segfault)
+	\end{itemize}
+\end{xframe}
+
+\begin{xframe}{Core dump}
+	\begin{itemize}
+		\item nebo lze dovolit generování tzv. core dumpů
+\begin{lstlisting}[basicstyle=\fontsize{8}{9}\selectfont\ttfamily]
+ulimit -c <size>
+\end{lstlisting}
+		\item \texttt{size} je specifikátor velikosti nebo \texttt{unlimited}
+		\item core dumpy jsou 1:1 dumpy paměti s diagnostickými informacemi, které umí GDB interpretovat
+		\item po pádu programu se v konzoli objeví hláška \texttt{core dumped} (resp. \texttt{obraz paměti uložen}
+		\item lze vyvolat
+\begin{lstlisting}[basicstyle=\fontsize{8}{9}\selectfont\ttfamily]
+gdb -c <coredump> <program>
+\end{lstlisting}
+		\item výchozí jméno je \texttt{core} a ukládá se k aplikaci
+	\end{itemize}
+\end{xframe}
+
+\begin{xframe}{Příkazy}
+	\begin{itemize}
+		\item \texttt{run} - spuštění programu (od začátku)
+		\item \texttt{break [where]} - nastavení breakpointu na místo (např. main.cpp:10)
+		\item \texttt{continue} - pokračování po zastavení
+		\item \texttt{backtrace [full]} - výstup zanoření v aktuálním vlákně (full = včetně všech kontextových informací)
+		\item \texttt{frame [num]} - přesun do jiného frame zanoření v aktuálním kontextu
+		\item \texttt{info threads} - informace o běžících vláknech
+		\item \texttt{thread [num]} - přesun do kontextu jiného vlákna
+		\item \texttt{print [symbol]} - vytištění symbolu (syntaxe jako v kódu)
+		\item \texttt{quit} - ukončení GDB
+		\item a samozřejmě spousty, spousty dalších, toto je jen základní sada
+	\end{itemize}
+\end{xframe}
+
+\begin{xframe}{Příkazy}
+	\begin{itemize}
+		\item my budeme navíc potřebovat ještě
+		\item \texttt{thread apply [thread list / all] command} - provedení příkazu nad více vlákny
+		\item nejčastěji jako:
+\begin{lstlisting}[basicstyle=\fontsize{8}{9}\selectfont\ttfamily]
+thread apply all backtrace full
+\end{lstlisting}
+	\end{itemize}
+\end{xframe}
+
+\begin{xframe}{Příklad}
+	\begin{itemize}
+		\item Prostor pro příklady 13\_a\_segfault, 13\_b\_segfault a 13\_c\_deadlock
+	\end{itemize}
+\end{xframe}
+
+\section{Perf}
+\subsection{O perfu}
+
+\begin{xframe}{Perf}
+	\begin{itemize}
+		\item diagnostický subsystém
+		\item mj. použitelný i jako profiler
+		\item integrovaný do jádra linuxu (perf events)
+		\item neinvazivní metoda diagnostiky aplikace
+		\item bohužel nutný superuser (\texttt{root})
+		\item na Debian-based distribucích balíček \texttt{linux-tools}
+	\end{itemize}
+\end{xframe}
+
+\subsection{Příkazy}
+
+\begin{xframe}{Práce s perfem}
+	\begin{itemize}
+		\item lze buď aplikaci spustit pod perfem
+\begin{lstlisting}[basicstyle=\fontsize{8}{9}\selectfont\ttfamily]
+perf record ./aplikace
+\end{lstlisting}
+		\item nebo se lze připojit k již běžícímu procesu podle PIDu
+\begin{lstlisting}[basicstyle=\fontsize{8}{9}\selectfont\ttfamily]
+perf record -p 1234
+\end{lstlisting}
+		\item je vhodné připojit přepínač \texttt{-g} pro zaznamenání hierarchie volání
+	\end{itemize}
+\end{xframe}
+
+\begin{xframe}{Eventy}
+	\begin{itemize}
+		\item perf zaznamenává vzorek (zanoření, aktuální adresa) v momentě, kdy přijde tzv. event
+		\item event je propagován interní cestou přes jádro (perf events subsystém), HW eventy navíc pomocí přerušení
+		\item defaultně se zaznamenávají cykly CPU (event \texttt{cycles})
+		\item lze ale profilovat i počet cache-miss, syscallů, instrukcí, branch-miss a mnoho dalšího (celý seznam \texttt{perf list})
+		\item přepínač \texttt{-e <event>}
+	\end{itemize}
+\end{xframe}
+
+\begin{xframe}{Prohlížení}
+	\begin{itemize}
+		\item perf ukládá soubor \texttt{perf.data} do aktuálního adresáře
+		\item v něm jsou zaznamenány i cesty k souborům s kódem, atd. - není proto potřeba být v žádném konkrétním adresáři
+		\item data lze prohlédnout příkazem
+\begin{lstlisting}[basicstyle=\fontsize{8}{9}\selectfont\ttfamily]
+perf report
+\end{lstlisting}
+		\item popř. formou anotovaného kódu
+\begin{lstlisting}[basicstyle=\fontsize{8}{9}\selectfont\ttfamily]
+perf annotate
+\end{lstlisting}
+		\item nebo PIVO \url{https://github.com/ProjectPIVO} :)
+	\end{itemize}
+\end{xframe}
+
+\begin{xframe}{Příklad}
+	\begin{itemize}
+		\item Prostor pro příklad 14\_a\_slow
+	\end{itemize}
+\end{xframe}
+
+\section{Závěr}
+\subsection{Závěr}
+
+\begin{xframe}{Závěr}
+	\begin{itemize}
+		\item CMake, GDB, Valgrind a perf jsou obrovské nástroje
+		\item probrali jsme přehled základních prvků
+	\end{itemize}
+\end{xframe}
+
+
+
+
+\begin{xframe}{Konec 11., 12., 13. a 14. části}
+\texttt{std::cout << "Děkuji za pozornost"~<< std::endl;}
+\texttt{exit(0);}
+\end{xframe}
+
+
+
+
+\end{document}
+
+
+
+

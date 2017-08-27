@@ -1,3 +1,3 @@
 ADD_SUBDIRECTORY(a_segfault)
 ADD_SUBDIRECTORY(b_segfault)
-ADD_SUBDIRECTORY(c_segfault)
+ADD_SUBDIRECTORY(c_deadlock)

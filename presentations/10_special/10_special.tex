@@ -91,12 +91,166 @@ int arg2 = magicTransform(99);
 \end{xframe}
 
 
-% TODO
+\begin{xframe}{Lambda funkce}
+	\begin{itemize}
+		\item \texttt{\#include <functional>}
+		\item anonymní funkce
+		\item šablonový typ \texttt{std::function}
+		\item lze definovat vztah s vnější scope pomocí \emph{capture} bloku
+			\begin{itemize}
+				\item předávání hodnotou (kopií) (\texttt{=}) nebo referencí (\texttt{\&})
+				\item předávání selektivně nebo všeho
+			\end{itemize}
+		\item parametry funkce standardně
+		\item návratová hodnota určena typem v šabloně, dedukována, popř. určena
+	\end{itemize}
+\end{xframe}
 
+\begin{xframe}{Příklady}
+	\begin{itemize}
+		\item bezparametrická, bez capture, bez návratové hodnoty
+\begin{lstlisting}[basicstyle=\fontsize{8}{9}\selectfont\ttfamily]
+std::function<void()> fn = []() { };
+\end{lstlisting}
+		\item bezparametrická, capture všeho hodnotou, vrací integer
+\begin{lstlisting}[basicstyle=\fontsize{8}{9}\selectfont\ttfamily]
+std::function<int()> fn = [=]() -> int { return 5; };
+auto fn = [=]() { return (int)5; };
+\end{lstlisting}
+		\item parametry, capture specifický, návratová hodnota dedukovaná
+\begin{lstlisting}[basicstyle=\fontsize{8}{9}\selectfont\ttfamily]
+auto fn = [a, b, &c, this](int p1, float p2) {
+    return p1*a + b + c.x*p2 + getSomething();
+};
+\end{lstlisting}
+	\end{itemize}
+\end{xframe}
+
+\begin{xframe}{Příklady}
+	\begin{itemize}
+		\item často použití v konkrétním kontextu
+		\item vláknová funkce
+\begin{lstlisting}[basicstyle=\fontsize{8}{9}\selectfont\ttfamily]
+std::thread thr1([&]() {
+    while (running)
+        doSomething();
+});
+\end{lstlisting}
+		\item predikát pro řazení
+\begin{lstlisting}[basicstyle=\fontsize{8}{9}\selectfont\ttfamily]
+std::sort(a.begin(), a.end(), [](int x, int y) {
+    return x < y;
+});
+\end{lstlisting}
+		\item a další...
+	\end{itemize}
+\end{xframe}
+
+\begin{xframe}{Vsuvka: std::bind}
+	\begin{itemize}
+		\item v STL modulu \emph{functional} dále možnost svázat volání funkce s parametrem
+		\item hodí se např. pokud víme, že budeme určitou funkci volat stále se stejným parametrem
+		\item pro ostatní parametry musíme při vytváření bindingu použít tzv. placeholder
+		\item výsledný typ pak přetěžuje operátor() a odstiňuje funkční volání
+	\end{itemize}
+\end{xframe}
+
+\begin{xframe}{Vsuvka: std::bind}
+	\begin{itemize}
+		\item např. bind parametru funkce powf pro druhou mocninu - exponent vždy 2
+		\item funkce \texttt{powf} má dva argumenty: základ (ten chceme proměnný) a exponent (ten chceme vždy 2)
+		\item proto za základ vložíme placeholder a za exponent konstantu
+\begin{lstlisting}[basicstyle=\fontsize{8}{9}\selectfont\ttfamily]
+auto druha_mocnina =
+     std::bind(powf, std::placeholders::_1, 2.0f);
+\end{lstlisting}
+		\item nyní lze volat
+\begin{lstlisting}[basicstyle=\fontsize{8}{9}\selectfont\ttfamily]
+// ekvivalent k powf(15.0f, 2.0f);
+float kv = druha_mocnina(15.0f);
+\end{lstlisting}		
+	\end{itemize}
+\end{xframe}
+
+\begin{xframe}{Vsuvka: std::bind}
+	\begin{itemize}
+		\item nelze spolehlivě říct, kdy je lepší bind, a kdy funkce / lambda
+		\item většinou jde o konkrétní případy
+		\item hraje roli pouze čistota kódu a styl, než výkon nebo možnosti
+	\end{itemize}
+\end{xframe}
 
 \begin{xframe}{Příklad}
 	\begin{itemize}
 		\item Prostor pro příklad 10\_b\_lambda
+	\end{itemize}
+\end{xframe}
+
+\begin{xframe}{Automatická dedukce typu}
+	\begin{itemize}
+		\item klíčové slovo \texttt{auto}
+		\item lze dedukovat typ proměnné, návratový typ funkce, šablonový typ, a další...
+		\item nám bude stačit typ proměnné a návratový typ funkce
+		\item někdy se velmi hodí - šetří psaní a pamatování
+		\item např. u \texttt{std::bind} je to více než vhodné
+	\end{itemize}
+\end{xframe}
+
+\begin{xframe}{Automatická dedukce typu}
+	\begin{itemize}
+		\item dedukce typu proměnné
+			\begin{itemize}
+				\item podle přiřazované hodnoty
+				\item podle návratové hodnoty funkce
+			\end{itemize}
+		\item dedukce návratové hodnoty
+			\begin{itemize}
+				\item podle \texttt{return} statementu
+				\item explicitním určením syntaxí s \texttt{->} (např. částečné dourčení typu, vhodné u lambda funkcí)
+			\end{itemize}
+	\end{itemize}
+\end{xframe}
+
+\begin{xframe}{Automatická dedukce typu}
+	\begin{itemize}
+		\item dedukce u proměnných je většinou úspěšná
+\begin{lstlisting}[basicstyle=\fontsize{8}{9}\selectfont\ttfamily]
+auto val = 5; // dedukovan integer
+auto valf = 1.2f // dedukovan float
+auto str = "abcd"; // dedukovan const char*
+auto kv = powf(5.0f, 2.0f); // dedukovan float
+\end{lstlisting}
+		\item u funkcí existují případy jednoduché (jeden return, není jiná možnost jak dedukovat)
+\begin{lstlisting}[basicstyle=\fontsize{8}{9}\selectfont\ttfamily]
+auto getPositionX()
+{
+    return mPositionX;
+}
+\end{lstlisting}
+	\end{itemize}
+\end{xframe}
+
+\begin{xframe}{Automatická dedukce typu}
+	\begin{itemize}
+		\item ...i případy složitější
+\begin{lstlisting}[basicstyle=\fontsize{8}{9}\selectfont\ttfamily]
+auto getSomething()
+{
+    if (condition)
+        return nullptr;
+    if (otherCondition)
+        return mMember;
+    return std::get<0>(sometuple);
+}
+\end{lstlisting}
+		\item syntaxi lze doplnit o dedukci typu
+\begin{lstlisting}[basicstyle=\fontsize{8}{9}\selectfont\ttfamily]
+auto getSomething() -> MyType*
+\end{lstlisting}
+		\item má smysl např. u lambda funkcí - šetří psaní std::function<..>
+\begin{lstlisting}[basicstyle=\fontsize{8}{9}\selectfont\ttfamily]
+auto myLambda = []() -> int { return a ? 2 : 9.0; };
+\end{lstlisting}
 	\end{itemize}
 \end{xframe}
 
@@ -106,9 +260,87 @@ int arg2 = magicTransform(99);
 	\end{itemize}
 \end{xframe}
 
+\subsection{STL knihovna}
+
+\begin{xframe}{Algoritmy STL knihovny}
+	\begin{itemize}
+		\item \texttt{\#include <algorithm>}
+		\item obsahuje základní sadu algoritmů, která se může kdykoliv hodit
+		\item jejich implementace je závislá na dodavateli standardní knihovny (ostatně jako vše ve standardní knihovně)
+		\item můžeme se ale pravděpodobně spolehnout na kvalitní implementaci, co nejblíže optimu
+	\end{itemize}
+\end{xframe}
+
+\begin{xframe}{Algoritmy STL knihovny}
+	\begin{itemize}
+		\item algoritmů je přítomno spousty, budou uvedeny jen někteří zástupci
+		\item práce s algoritmy pak odráží jednotné schéma
+		\item často je vstupem rozsah iterátorů, parametr a např. funkce/funktor/lambda
+	\end{itemize}
+\end{xframe}
+
+\begin{xframe}{Algoritmy STL knihovny}
+	\begin{itemize}
+		\item \texttt{std::generate} - do daného rozsahu nageneruje danou funkcí hodnoty (náhrada za for cyklus)
+		\item \texttt{std::shuffle} - náhodné rozmíchání daného rozsahu
+		\item \texttt{std::move} - provede přesun obsahu objektu (rozsahu) do druhého (např. přesun vlastnictví unique\_ptr
+		\item \texttt{std::copy} - kopie objektu (rozsahu) do druhého
+		\item \texttt{std::for\_each} - nad zadaným rozsahem provede danou funkci
+		\item \texttt{std::sort} - seřadí rozsah, můžeme dodat i funkci pro řazení
+	\end{itemize}
+\end{xframe}
+
+\begin{xframe}{Algoritmy STL knihovny}
+	\begin{itemize}
+		\item \texttt{std::count\_if} - spočítá prvky splňující kritérium (funkce)
+		\item \texttt{std::min\_element}, \texttt{std::max\_element} - najde minimální/maximální prvek
+		\item \texttt{std::minmax\_element} - sdružené předchozí funkce
+		\item \texttt{std::prev\_permutation}, \texttt{std::next\_permutation} - generování permutací
+		\item a mnoho dalších... \url{http://en.cppreference.com/w/cpp/header/algorithm}
+	\end{itemize}
+\end{xframe}
+
 \begin{xframe}{Příklad}
 	\begin{itemize}
 		\item Prostor pro příklad 10\_d\_stl
+	\end{itemize}
+\end{xframe}
+
+\subsection{Jazyk}
+
+\begin{xframe}{enum class}
+	\begin{itemize}
+		\item klíčové slovo \texttt{class} u výčtového typu
+		\item výčtový typ se tímto stane tzv. silně typovaný
+		\item chová se proto jako samostatný typ, ne alias pro integer
+		\item hodnotu je nutné vždy uvodit názvem výčtového typu
+\begin{lstlisting}[basicstyle=\fontsize{8}{9}\selectfont\ttfamily]
+enum class MyEnum
+{
+    Value1,
+    Value2,
+    Value3
+};
+
+MyEnum val = MyEnum::Value1;
+\end{lstlisting}
+	\end{itemize}
+\end{xframe}
+
+\begin{xframe}{enum class}
+	\begin{itemize}
+		\item lze však explicitně převést typ na integer a nazpátek, jde jen o syntaktickou kontrolu
+\begin{lstlisting}[basicstyle=\fontsize{8}{9}\selectfont\ttfamily]
+enum class MyEnum
+{
+    Value1,
+    Value2,
+    Value3
+};
+
+int val = (int)MyEnum::Value1;
+MyEnum val2 = (MyEnum)val;
+\end{lstlisting}
 	\end{itemize}
 \end{xframe}
 
@@ -118,16 +350,127 @@ int arg2 = magicTransform(99);
 	\end{itemize}
 \end{xframe}
 
+\begin{xframe}{Range-based for}
+	\begin{itemize}
+		\item "chytrý"~for cyklus, který si je vědom rozsahů containerů
+		\item nebo lépe.. je si vědom, že se často iteruje "od \texttt{begin()} až do \texttt{end()}"
+		\item dovoluje tedy projít celý container užitím zkrácené syntaxe, např.
+\begin{lstlisting}[basicstyle=\fontsize{8}{9}\selectfont\ttfamily]
+for (int &hodnota : intVektor)
+{
+    // do something
+}
+\end{lstlisting}
+	\end{itemize}
+\end{xframe}
+
+\begin{xframe}{Range-based for}
+	\begin{itemize}
+		\item zajímat nás budou obměny deklarace prvku (levá část)
+		\item můžeme přejímat hodnoty hodnotou (kopií) a referencí
+		\item některé containery vyžadují, aby byly hodnoty \texttt{const} (např. mapa nebo množina)
+		\item lze použít automatickou dedukci typu, zda to bude reference/hodnota ale musíme rozhodnout my
+\begin{lstlisting}[basicstyle=\fontsize{8}{9}\selectfont\ttfamily]
+for (auto hodnota : container)
+{
+    // do something
+}
+
+for (auto &hodnota : container)
+{
+    // do something
+}
+\end{lstlisting}
+	\end{itemize}
+\end{xframe}
+
+\begin{xframe}{Range-based for}
+	\begin{itemize}
+		\item \texttt{std::map} takto vrací instanci \texttt{std::pair}
+		\item první prvek páru musí být vždy \texttt{const}
+			\begin{itemize}
+				\item ze zjevných důvodů - přímá modifikace klíče by mohla poškodit integritu kontejneru
+			\end{itemize}
+\begin{lstlisting}[basicstyle=\fontsize{8}{9}\selectfont\ttfamily]
+for (std::pair<const int, int> par : mapa)
+{
+    // do something
+}
+\end{lstlisting}
+		\item je možná i const reference - pak ale nelze měnit ani hodnotu
+\begin{lstlisting}[basicstyle=\fontsize{8}{9}\selectfont\ttfamily]
+for (std::pair<int, int> const& par : mapa)
+{
+    // do something
+}
+\end{lstlisting}
+	\end{itemize}
+\end{xframe}
+
+\begin{xframe}{Range-based for}
+	\begin{itemize}
+		\item \texttt{std::set} sice vrací prvek jako takový, ale vždy kopií nebo \texttt{const} referencí
+		\item opět ze zjevných důvodů - prvek je klíčován sám sebou
+\begin{lstlisting}[basicstyle=\fontsize{8}{9}\selectfont\ttfamily]
+for (int par : mapa)
+{
+    // do something
+}
+
+for (int const& par : mapa)
+{
+    // do something
+}
+\end{lstlisting}
+	\end{itemize}
+\end{xframe}
+
 \begin{xframe}{Příklad}
 	\begin{itemize}
 		\item Prostor pro příklad 10\_f\_range\_based\_for
 	\end{itemize}
 \end{xframe}
 
+\section{Kam dál?}
+
+\subsection{Doporučení}
+
+\begin{xframe}{Konec}
+	\begin{itemize}
+		\item C++ jazyk a STL jsou obří, zdaleka jsme neobsáhli všechno
+		\item další studium, zajímavé věci...
+	\end{itemize}
+\end{xframe}
+
+\begin{xframe}{Další studium}
+	\begin{itemize}
+		\item regulární výrazy
+		\item synchronizace vláken - čtenář-písař, různé atomic containery
+		\item další možnosti random enginů
+		\item zbytek \texttt{<algorithm>} hlavičky
+		\item šablonové porno (static\_assert, variable and variadic templates, ..)
+		\item RTTI, decltype a typeid
+		\item UTF-8
+		\item user-defined literals
+		\item zbytek \texttt{std::chrono}
+	\end{itemize}
+\end{xframe}
+
+\begin{xframe}{Další studium}
+	\begin{itemize}
+		\item atributy ( [[deprecated]], ..)
+		\item multimap, multiset
+		\item C++17
+		\item ...
+	\end{itemize}
+\end{xframe}
+
+
 
 
 
 \begin{xframe}{Konec 10. části}
+\texttt{std::cout << "Děkuji za pozornost"~<< std::endl;}
 \texttt{exit(0);}
 \end{xframe}
 
