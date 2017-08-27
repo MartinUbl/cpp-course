@@ -1,5 +1,7 @@
 #include <iostream>
 #include <string>
+#include <typeinfo>
+#include <exception>
 
 #include "elephant.h"
 #include "pig.h"

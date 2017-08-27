@@ -11,7 +11,7 @@ const size_t countOfThreads = 50;
 const size_t iterationCount = 10000;
 
 // uzitim std::atomic odbourame potrebu zamykat mutex apod.; jsou vyuzity dostupne strojove instrukce pro atomickou inkrementaci, apod.
-std::atomic<size_t> counter = 0;
+std::atomic<size_t> counter(0);
 //size_t counter = 0;
 
 // zjednodusena funkce z prikladu na mutex, jen bez mutexu, s vyuzitim strojovych prostredku pro atomicke operace

@@ -1,5 +1,6 @@
 #include <iostream>
 #include <set>
+#include <cstring>
 
 struct constchar_comparator
 {
